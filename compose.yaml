@@ -18,8 +18,7 @@ services:
       start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 ###< doctrine/doctrine-bundle ###
 
   app:
@@ -31,20 +30,15 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://app:app@database:5432/car_rental_db?serverVersion=16&charset=utf8
-      APP_ENV: dev
+      APP_ENV: prod
+      APP_DEBUG: 0
       APP_SECRET: change_me_in_production
     depends_on:
       database:
         condition: service_healthy
     volumes:
       - .:/var/www/html
-    command: >
-      sh -c "
-        php bin/console doctrine:schema:drop --force --no-interaction &&
-        php bin/console doctrine:schema:create --no-interaction &&
-        php bin/console doctrine:fixtures:load --no-interaction &&
-        php -S 0.0.0.0:8000 -t public
-      "
+    command: php -S 0.0.0.0:8000 -t public
 
 volumes:
 ###> doctrine/doctrine-bundle ###
