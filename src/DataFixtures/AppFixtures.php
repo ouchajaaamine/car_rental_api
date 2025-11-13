@@ -16,7 +16,7 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
-        // Create realistic cars
+        // Create cars
         $cars = [
             [
                 'brand' => 'Dacia',

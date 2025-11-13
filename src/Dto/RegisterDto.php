@@ -10,9 +10,6 @@ use App\Entity\User;
 use App\State\RegisterProcessor;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * Registration data transfer object.
- */
 #[ApiResource(
     operations: [
         new Post(
