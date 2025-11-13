@@ -41,21 +41,23 @@ final class ReservationProcessor implements ProcessorInterface
             throw new BadRequestHttpException('End date must be after start date');
         }
 
+        $user = $this->security->getUser();
+        
         $reservation = new Reservation();
         $reservation->setCar($car);
         $reservation->setStartDate($data->startDate);
         $reservation->setEndDate($data->endDate);
-        $reservation->setCustomerName($data->customerName);
+        $reservation->setCustomerName($user->getFirstName() . ' ' . $user->getLastName());
         $reservation->setCustomerPhone($data->customerPhone);
-        $reservation->setCustomerEmail($data->customerEmail);
+        $reservation->setCustomerEmail($user->getEmail());
         $reservation->setDriverLicenseNumber($data->driverLicenseNumber);
         $reservation->setStatus(ReservationStatus::ACTIVE);
-        $reservation->setUser($this->security->getUser());
+        $reservation->setUser($user);
 
         $interval = $data->startDate->diff($data->endDate);
         $totalDays = $interval->days;
         $reservation->setTotalDays($totalDays);
-        $reservation->setTotalPrice((string)($totalDays * $car->getPricePerDay()));
+        $reservation->setTotalPrice((string)($totalDays * $car->getDailyFee()));
 
         $this->entityManager->persist($reservation);
         $this->entityManager->flush();

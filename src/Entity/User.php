@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Enum\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,13 +15,20 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * User entity.
- */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[UniqueEntity(fields: ['email'], message: 'Email already exists')]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(security: "is_granted('ROLE_MANAGER')"),
+        new GetCollection(security: "is_granted('ROLE_MANAGER')"),
+        new Get(
+            uriTemplate: '/users/{id}/reservations',
+            security: "is_granted('ROLE_MANAGER')",
+            provider: \App\State\UserReservationProvider::class
+        )
+    ]
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]

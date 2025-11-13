@@ -9,14 +9,12 @@ use ApiPlatform\Metadata\Post;
 use App\State\ReservationProcessor;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * Reservation creation data transfer object.
- */
 #[ApiResource(
     operations: [
         new Post(
             uriTemplate: '/reservations',
-            processor: ReservationProcessor::class
+            processor: ReservationProcessor::class,
+            security: "is_granted('ROLE_CUSTOMER')"
         )
     ]
 )]
@@ -34,15 +32,8 @@ final class CreateReservationDto
     public ?int $carId = null;
 
     #[Assert\NotBlank]
-    #[Assert\Length(min: 2, max: 100)]
-    public ?string $customerName = null;
-
-    #[Assert\NotBlank]
     #[Assert\Length(min: 10, max: 20)]
     public ?string $customerPhone = null;
-
-    #[Assert\Email]
-    public ?string $customerEmail = null;
 
     #[Assert\NotBlank]
     #[Assert\Length(min: 5, max: 50)]

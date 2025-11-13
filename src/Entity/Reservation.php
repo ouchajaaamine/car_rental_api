@@ -35,11 +35,11 @@ class Reservation
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:read'])]
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:read'])]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
@@ -48,7 +48,7 @@ class Reservation
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:read'])]
     private ?Car $car = null;
 
     #[ORM\ManyToOne]
@@ -57,19 +57,19 @@ class Reservation
     private ?User $user = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:read'])]
     private ?string $customerName = null;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:read'])]
     private ?string $customerPhone = null;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:read'])]
     private ?string $customerEmail = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['reservation:read', 'reservation:write'])]
+    #[Groups(['reservation:read'])]
     private ?string $driverLicenseNumber = null;
 
 

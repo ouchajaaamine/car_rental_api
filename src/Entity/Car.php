@@ -14,9 +14,6 @@ use App\Repository\CarRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-/**
- * Car entity.
- */
 #[ORM\Entity(repositoryClass: CarRepository::class)]
 #[ApiResource(
     operations: [
