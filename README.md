@@ -29,6 +29,18 @@ The API will be accessible at `http://localhost:8000`
 
 The database is automatically created with test data (cars and users).
 
+## API Documentation (Swagger)
+
+Interactive API documentation is available via Swagger UI:
+
+**URL:** `http://localhost:8000/api/docs`
+
+The Swagger interface allows you to:
+- Browse all available endpoints
+- View request/response schemas
+- Test endpoints directly from your browser
+- Authenticate with JWT tokens (click "Authorize" button and enter: `Bearer {your_token}`)
+
 ## User Accounts
 
 The application contains pre-created test users:
