@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Rental API - Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        h1 { color: #333; }
+        .endpoint { background: #f5f5f5; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .endpoint h3 { margin-top: 0; color: #0066cc; }
+        textarea { width: 100%; height: 100px; font-family: monospace; }
+        button { background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0052a3; }
+        pre { background: #f9f9f9; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🚗 Car Rental API - Test Interface</h1>
+    
+    <div class="endpoint">
+        <h3>1. POST /api/register - Créer un utilisateur</h3>
+        <textarea id="registerData">{
+  "email": "test@example.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Doe"
+}</textarea>
+        <button onclick="register()">Test Register</button>
+        <pre id="registerResponse"></pre>
+    </div>
+
+    <div class="endpoint">
+        <h3>2. POST /api/login - Se connecter</h3>
+        <textarea id="loginData">{
+  "username": "test@example.com",
+  "password": "password123"
+}</textarea>
+        <button onclick="login()">Test Login</button>
+        <pre id="loginResponse"></pre>
+    </div>
+
+    <div class="endpoint">
+        <h3>3. GET /api/cars - Liste des voitures (nécessite JWT)</h3>
+        <input type="text" id="token" placeholder="Collez le token JWT ici" style="width: 100%; padding: 10px;">
+        <button onclick="getCars()">Test Get Cars</button>
+        <pre id="carsResponse"></pre>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+
+        async function register() {
+            try {
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: document.getElementById('registerData').value
+                });
+                const data = await response.json();
+                document.getElementById('registerResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('registerResponse').className = response.ok ? 'success' : 'error';
+            } catch (error) {
+                document.getElementById('registerResponse').textContent = 'Error: ' + error.message;
+                document.getElementById('registerResponse').className = 'error';
+            }
+        }
+
+        async function login() {
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: document.getElementById('loginData').value
+                });
+                const data = await response.json();
+                document.getElementById('loginResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('loginResponse').className = response.ok ? 'success' : 'error';
+                
+                if (data.token) {
+                    document.getElementById('token').value = data.token;
+                    alert('Token copié! Vous pouvez maintenant tester les endpoints protégés.');
+                }
+            } catch (error) {
+                document.getElementById('loginResponse').textContent = 'Error: ' + error.message;
+                document.getElementById('loginResponse').className = 'error';
+            }
+        }
+
+        async function getCars() {
+            const token = document.getElementById('token').value;
+            if (!token) {
+                alert('Veuillez d\'abord vous connecter pour obtenir un token!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/cars`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                document.getElementById('carsResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('carsResponse').className = response.ok ? 'success' : 'error';
+            } catch (error) {
+                document.getElementById('carsResponse').textContent = 'Error: ' + error.message;
+                document.getElementById('carsResponse').className = 'error';
+            }
+        }
+    </script>
+</body>
+</html>

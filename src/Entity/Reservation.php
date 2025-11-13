@@ -3,62 +3,87 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Enum\ReservationStatus;
 use App\Repository\ReservationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            security: "is_granted('ROLE_CUSTOMER')",
+            provider: \App\State\ReservationProvider::class
+        ),
+        new Get(security: "is_granted('ROLE_CUSTOMER') and object.getUser() == user or is_granted('ROLE_MANAGER')"),
+        new Patch(security: "is_granted('ROLE_MANAGER')")
+    ],
+    normalizationContext: ['groups' => ['reservation:read']],
+    denormalizationContext: ['groups' => ['reservation:write']]
+)]
 class Reservation
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['reservation:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ?\DateTimeInterface $actualReturnDate = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ?Car $car = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['reservation:read'])]
     private ?User $user = null;
 
     #[ORM\Column(length: 100)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ?string $customerName = null;
 
     #[ORM\Column(length: 20)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ?string $customerPhone = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ?string $customerEmail = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ?string $driverLicenseNumber = null;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
-    private ?string $dailyRate = null;
 
     #[ORM\Column]
+    #[Groups(['reservation:read'])]
     private ?int $totalDays = null;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[Groups(['reservation:read'])]
     private ?string $totalPrice = null;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
-    private ?string $lateFee = null;
 
     #[ORM\Column(type: 'string', enumType: ReservationStatus::class)]
+    #[Groups(['reservation:read', 'reservation:write'])]
     private ReservationStatus $status = ReservationStatus::ACTIVE;
 
     #[ORM\Column]
@@ -168,17 +193,6 @@ class Reservation
         return $this;
     }
 
-    public function getDailyRate(): ?string
-    {
-        return $this->dailyRate;
-    }
-
-    public function setDailyRate(string $dailyRate): static
-    {
-        $this->dailyRate = $dailyRate;
-        return $this;
-    }
-
     public function getTotalDays(): ?int
     {
         return $this->totalDays;
@@ -198,17 +212,6 @@ class Reservation
     public function setTotalPrice(string $totalPrice): static
     {
         $this->totalPrice = $totalPrice;
-        return $this;
-    }
-
-    public function getLateFee(): ?string
-    {
-        return $this->lateFee;
-    }
-
-    public function setLateFee(?string $lateFee): static
-    {
-        $this->lateFee = $lateFee;
         return $this;
     }
 
