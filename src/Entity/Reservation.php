@@ -3,10 +3,12 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Enum\ReservationStatus;
 use App\Repository\ReservationRepository;
 use Doctrine\DBAL\Types\Types;
@@ -21,7 +23,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
             provider: \App\State\ReservationProvider::class
         ),
         new Get(security: "is_granted('ROLE_CUSTOMER') and object.getUser() == user or is_granted('ROLE_MANAGER')"),
-        new Patch(security: "is_granted('ROLE_MANAGER')")
+        new Put(security: "is_granted('ROLE_MANAGER')"),
+        new Delete(security: "is_granted('ROLE_MANAGER')")
     ],
     normalizationContext: ['groups' => ['reservation:read']],
     denormalizationContext: ['groups' => ['reservation:write']]
