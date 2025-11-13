@@ -119,17 +119,19 @@ Authorization: Bearer {token}
   "@context": "/api/contexts/Car",
   "@id": "/api/cars",
   "@type": "hydra:Collection",
+  "hydra:totalItems": 10,
   "hydra:member": [
     {
       "@id": "/api/cars/1",
       "@type": "Car",
       "id": 1,
-      "brand": "Toyota",
-      "model": "Corolla",
-      "pricePerDay": 50,
-      "fuelType": "GASOLINE",
-      "transmissionType": "MANUAL",
-      "availableQuantity": 5
+      "model": "Logan 2023",
+      "brand": "Dacia",
+      "inventory": 8,
+      "dailyFee": "250.00",
+      "seats": 5,
+      "transmission": "MANUAL",
+      "fuelType": "GASOLINE"
     }
   ]
 }
@@ -153,12 +155,13 @@ Authorization: Bearer {token}
   "@id": "/api/cars/1",
   "@type": "Car",
   "id": 1,
-  "brand": "Toyota",
-  "model": "Corolla",
-  "pricePerDay": 50,
-  "fuelType": "GASOLINE",
-  "transmissionType": "MANUAL",
-  "availableQuantity": 5
+  "model": "Logan 2023",
+  "brand": "Dacia",
+  "inventory": 8,
+  "dailyFee": "250.00",
+  "seats": 5,
+  "transmission": "MANUAL",
+  "fuelType": "GASOLINE"
 }
 ```
 
@@ -174,9 +177,11 @@ Authorization: Bearer {token}
 Content-Type: application/ld+json
 
 {
-  "car": "/api/cars/1",
-  "startDate": "2024-12-01",
-  "endDate": "2024-12-05"
+  "startDate": "2025-12-01T10:00:00.000Z",
+  "endDate": "2025-12-05T10:00:00.000Z",
+  "carId": 1,
+  "customerPhone": "0612345678",
+  "driverLicenseNumber": "MA-ABC-123456"
 }
 ```
 
@@ -187,11 +192,21 @@ Content-Type: application/ld+json
   "@id": "/api/reservations/1",
   "@type": "Reservation",
   "id": 1,
-  "car": "/api/cars/1",
-  "startDate": "2024-12-01T00:00:00+00:00",
-  "endDate": "2024-12-05T00:00:00+00:00",
-  "status": "PENDING",
-  "totalPrice": 200
+  "startDate": "2025-12-01T10:00:00+00:00",
+  "endDate": "2025-12-05T10:00:00+00:00",
+  "car": {
+    "id": 1,
+    "brand": "Dacia",
+    "model": "Logan 2023",
+    "dailyFee": "250.00"
+  },
+  "customerName": "Karim Alaoui",
+  "customerPhone": "0612345678",
+  "customerEmail": "karim.alaoui@gmail.com",
+  "driverLicenseNumber": "MA-ABC-123456",
+  "totalDays": 4,
+  "totalPrice": "1000.00",
+  "status": "ACTIVE"
 }
 ```
 
@@ -199,6 +214,7 @@ Content-Type: application/ld+json
 - Car availability for the requested period
 - End date is after start date
 - Dates are not in the past
+- The authenticated user's information (name, email) is automatically filled from their profile
 
 ---
 
@@ -216,12 +232,13 @@ Authorization: Bearer {token}
 Content-Type: application/ld+json
 
 {
+  "model": "Megane",
   "brand": "Renault",
-  "model": "Clio",
-  "pricePerDay": 35,
-  "fuelType": "DIESEL",
-  "transmissionType": "MANUAL",
-  "availableQuantity": 3
+  "inventory": 3,
+  "dailyFee": "350.00",
+  "seats": 5,
+  "transmission": "AUTOMATIC",
+  "fuelType": "HYBRID"
 }
 ```
 
@@ -232,15 +249,16 @@ Content-Type: application/ld+json
 ```json
 {
   "@context": "/api/contexts/Car",
-  "@id": "/api/cars/2",
+  "@id": "/api/cars/11",
   "@type": "Car",
-  "id": 2,
+  "id": 11,
+  "model": "Megane",
   "brand": "Renault",
-  "model": "Clio",
-  "pricePerDay": 35,
-  "fuelType": "DIESEL",
-  "transmissionType": "MANUAL",
-  "availableQuantity": 3
+  "inventory": 3,
+  "dailyFee": "350.00",
+  "seats": 5,
+  "transmission": "AUTOMATIC",
+  "fuelType": "HYBRID"
 }
 ```
 
@@ -251,7 +269,7 @@ Display all reservations for a specific user.
 **Accessible by:** Manager only  
 **Request:**
 ```bash
-GET /api/users/1/reservations
+GET /api/users/2/reservations
 Authorization: Bearer {token}
 ```
 
@@ -259,18 +277,27 @@ Authorization: Bearer {token}
 ```json
 {
   "@context": "/api/contexts/Reservation",
-  "@id": "/api/users/1/reservations",
+  "@id": "/api/users/2/reservations",
   "@type": "hydra:Collection",
+  "hydra:totalItems": 2,
   "hydra:member": [
     {
       "@id": "/api/reservations/1",
       "@type": "Reservation",
       "id": 1,
-      "car": "/api/cars/1",
       "startDate": "2024-12-01T00:00:00+00:00",
       "endDate": "2024-12-05T00:00:00+00:00",
-      "status": "PENDING",
-      "totalPrice": 200
+      "car": {
+        "id": 1,
+        "brand": "Dacia",
+        "model": "Logan 2023",
+        "dailyFee": "250.00"
+      },
+      "customerName": "Karim Alaoui",
+      "customerPhone": "0612345678",
+      "totalDays": 4,
+      "totalPrice": "1000.00",
+      "status": "ACTIVE"
     }
   ]
 }
@@ -280,7 +307,7 @@ Authorization: Bearer {token}
 
 #### 6. Update a Reservation
 
-Modify the dates of an existing reservation.
+Modify the status or return date of an existing reservation.
 
 **Accessible by:** Manager only  
 **Request:**
@@ -290,10 +317,12 @@ Authorization: Bearer {token}
 Content-Type: application/ld+json
 
 {
-  "startDate": "2024-12-02",
-  "endDate": "2024-12-07"
+  "actualReturnDate": "2025-12-07T14:30:00.000Z",
+  "status": "RETURNED"
 }
 ```
+
+**Available status values:** `ACTIVE`, `RETURNED`
 
 **Response:**
 ```json
@@ -302,17 +331,27 @@ Content-Type: application/ld+json
   "@id": "/api/reservations/1",
   "@type": "Reservation",
   "id": 1,
-  "car": "/api/cars/1",
-  "startDate": "2024-12-02T00:00:00+00:00",
-  "endDate": "2024-12-07T00:00:00+00:00",
-  "status": "PENDING",
-  "totalPrice": 250
+  "startDate": "2025-12-01T10:00:00+00:00",
+  "endDate": "2025-12-05T10:00:00+00:00",
+  "actualReturnDate": "2025-12-07T14:30:00+00:00",
+  "car": {
+    "id": 1,
+    "brand": "Dacia",
+    "model": "Logan 2023",
+    "dailyFee": "250.00"
+  },
+  "customerName": "Karim Alaoui",
+  "customerPhone": "0612345678",
+  "totalDays": 4,
+  "totalPrice": "1000.00",
+  "status": "RETURNED"
 }
 ```
 
 **Note:** 
-- Total price is automatically recalculated
-- Customer information (name, email) cannot be modified through this endpoint
+- Only managers can update reservations
+- You can update the status (ACTIVE/RETURNED) and actualReturnDate
+- Customer information cannot be modified through this endpoint
 
 #### 7. Delete a Reservation
 
@@ -381,7 +420,13 @@ $token = $response.token
 ### Create a reservation
 ```powershell
 $headers = @{Authorization = "Bearer $token"}
-$body = @{car="/api/cars/1"; startDate="2024-12-01"; endDate="2024-12-05"} | ConvertTo-Json
+$body = @{
+  startDate = "2025-12-01T10:00:00.000Z"
+  endDate = "2025-12-05T10:00:00.000Z"
+  carId = 1
+  customerPhone = "0612345678"
+  driverLicenseNumber = "MA-ABC-123456"
+} | ConvertTo-Json
 Invoke-RestMethod -Uri "http://localhost:8000/api/reservations" -Method POST -Headers $headers -Body $body -ContentType "application/ld+json"
 ```
 
